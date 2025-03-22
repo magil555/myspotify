@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <style>
+        body {
+            background-image: url('background.jpg'); /* Pastikan file background.jpg sudah diupload */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        .player-container {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.5); /* Transparansi hitam */
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .video-container {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .video-container video {
+            width: 100%;
+            border-radius: 15px;
+        }
+        .song-info {
+            text-align: left;
+            width: 100%;
+            color: white;
+            margin-top: 10px;
+        }
+        .song-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .artist {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between; /* Menyusun tombol dalam satu baris */
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%; /* Pastikan tombol mengisi seluruh lebar */
+        }
+        .controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .controls span {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #444;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: #ff4b5c;
+            border-radius: 5px;
+        }
+        .lyrics-box {
+            width: 100%;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.6); /* Transparansi hitam */
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow-y: scroll;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .time-info {
+            color: white;
+            margin-top: 10px;
+        }
+
+        /* Efek untuk teks "Matcha" */
+        .matcha-text {
+            color: #32CD32; /* Hijau terang */
+            font-size: 20px;
+            font-weight: bold;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        /* Efek untuk teks "Cookies" */
+        .cookies-text {
+            color: #D2B48C; /* Coklat muda */
+            font-size: 20px;
+            font-weight: bold;
+            animation: glowCookies 1.5s infinite alternate;
+        }
+
+        /* Animasi berkilau untuk "Matcha" */
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 5px #32CD32, 0 0 10px #32CD32, 0 0 15px #32CD32;
+            }
+            100% {
+                text-shadow: 0 0 10px #32CD32, 0 0 20px #32CD32, 0 0 30px #32CD32;
+            }
+        }
+
+        /* Animasi berkilau untuk "Cookies" */
+        @keyframes glowCookies {
+            0% {
+                text-shadow: 0 0 5px #D2B48C, 0 0 10px #D2B48C, 0 0 15px #D2B48C;
+            }
+            100% {
+                text-shadow: 0 0 10px #D2B48C, 0 0 20px #D2B48C, 0 0 30px #D2B48C;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="video-container">
+            <video id="video" src="kita.mp4" preload="auto" muted loop></video> <!-- Ganti dengan video yang diinginkan -->
+        </div>
+        <div class="song-info">
+            <div class="song-title">Style</div>
+            <div class="artist">Taylor Swift</div>
+        </div>
+        <audio id="audio" src="Thestyle.mp3" preload="auto"></audio> <!-- Musik -->
+        
+        <!-- Waktu Lagu -->
+        <div class="time-info">
+            <span id="current-time">0:00</span> / <span id="total-time">0:00</span> <!-- Waktu Lagu -->
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="controls">
+            <button onclick="audio.currentTime -= 10">⏪</button> <!-- Tombol Mundur -->
+            <span class="matcha-text">Agil</span> <!-- Teks Matcha dengan efek glow hijau -->
+            <button id="playPauseBtn" onclick="playPause()">▶️</button> <!-- Tombol Play/Pause -->
+            <span class="cookies-text">Aurel</span> <!-- Teks Cookies dengan efek glow coklat muda -->
+            <button onclick="audio.currentTime += 10">⏩</button> <!-- Tombol Maju -->
+        </div>
+
+        <!-- Kotak untuk Lirik -->
+        <div class="lyrics-box" id="lyrics-box">
+            <p id="lyrics"></p>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById("audio");
+        const video = document.getElementById("video");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const lyricsBox = document.getElementById("lyrics-box");
+        const progressBar = document.getElementById("progress-bar");
+        const currentTimeText = document.getElementById("current-time");
+        const totalTimeText = document.getElementById("total-time");
+        const lyrics = [
+            { time: 0, text: "We never go out of style" },
+            { time: 5, text: "You got that long hair, slicked back, white t-shirt" },
+            { time: 10, text: "And I got that good girl faith and a tight little skirt" },
+            { time: 15, text: "And when we go crashing down, we come back every time" },
+            { time: 20, text: "We never go out of style" },
+            { time: 25, text: "Takes me home" },
+            { time: 28, text: "Just take me home" },
+            { time: 41, text: "Out of style" },
+            { time: 43, text: "You got that James Dean daydream look in your eye" },
+            { time: 48, text: "And I got that red lip classic thing that you like" },
+            { time: 52, text: "And when we go crashing down, we come back every time" },
+            { time: 57, text: "We never go out of style" },
+        ];
+
+        let currentLyricIndex = 0;
+
+        // Fungsi untuk menampilkan lirik secara bergantian
+        function showLyrics() {
+            if (currentLyricIndex < lyrics.length && audio.currentTime >= lyrics[currentLyricIndex].time) {
+                const lyric = lyrics[currentLyricIndex].text;
+                const lyricElement = document.createElement("p");
+                lyricElement.textContent = lyric;
+                lyricsBox.appendChild(lyricElement);
+
+                // Efek transisi (fade-in)
+                lyricElement.style.opacity = 0;
+                setTimeout(() => {
+                    lyricElement.style.transition = "opacity 1s";
+                    lyricElement.style.opacity = 1;
+                }, 100);
+
+                currentLyricIndex++;
+            }
+        }
+
+        // Fungsi untuk play/pause musik
+        function playPause() {
+            if (audio.paused) {
+                audio.play();
+                video.play();  // Video juga diputar saat audio diputar
+                playPauseBtn.textContent = "⏸";  // Mengubah tombol menjadi Pause
+            } else {
+                audio.pause();
+                video.pause();  // Video juga dihentikan saat audio dihentikan
+                playPauseBtn.textContent = "▶️";  // Mengubah tombol menjadi Play
+            }
+        }
+
+        // Fungsi untuk menunjukkan waktu lagu
+        function updateTime() {
+            const currentTime = formatTime(audio.currentTime);
+            const totalTime = formatTime(audio.duration);
+            currentTimeText.textContent = currentTime;
+            totalTimeText.textContent = totalTime;
+
+            // Update progress bar
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Format waktu menjadi menit:detik
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Update lirik dan progress setiap kali musik diputar
+        audio.addEventListener("timeupdate", () => {
+            showLyrics();
+            updateTime();
+        });
+    </script>
+</body>
+</html>
